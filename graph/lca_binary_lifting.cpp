@@ -37,10 +37,12 @@ int lca(int x, int y)
 	if (x == y) return x;
 
 	for (int i = maxlog-1; i >= 0; i--)
-		if (anc[x][i] != anc[y][i])
+		if (anc[x][i] != anc[y][i] and
+			anc[x][i] != 0 and anc[y][i] != 0)
 			x = anc[x][i], y = anc[y][i];
 
-	return x = anc[x][0];
+	if (x == y) return x;
+	return anc[x][0];
 }
 
 int main()
