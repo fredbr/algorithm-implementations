@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const int maxn = 10101010;
+const int maxn = 101010101;
 
 char s[maxn];
 // bitset<maxn> s;
@@ -13,7 +13,7 @@ void init()
 {
 	for (int i = 2; i*i < maxn; i++)
 		if (!s[i]) 
-			for (int j = i*i; j < maxn; j++)
+			for (int j = i*i; j < maxn; j += i)
 				s[j] = 1;
 
 	for (int i = 2; i < maxn; i++)
