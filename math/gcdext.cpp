@@ -6,7 +6,7 @@ typedef long long ll;
 
 tuple<ll, ll, ll> gcdext(ll a, ll b)
 {
-	if (a == 0)
+	if (b == 0)
 		return {1, 0, a};
 	int x, y, g;
 	tie(x, y, g) = gcdext(b, a%b);
