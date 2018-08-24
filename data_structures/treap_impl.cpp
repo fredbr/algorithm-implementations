@@ -42,35 +42,34 @@ private:
 		op(t);
 	}
 
-	void split(Node *t, Node *&l, Node *&r, T v)
+	void split(Node *t, Node *&l, Node *&r, int pos)
 	{
 		if (!t) return void(l=r=nullptr);
-		if (v > t->val)
-			split(t->r, t->r, r, v), l = t;
+
+		int p = 1;
+		if (t->l) p += t->l->sz;
+
+		if (p < pos)
+			split(t->r, t->r, r, pos-p), l = t;
 		else 
-			split(t->l, l, t->l, v), r = t;
+			split(t->l, l, t->l, pos), r = t;
 		op(l), op(r);
 	}
 
-	void insert(Node *&t, Node *v)
-	{
-		if (!t) return void(t=v);
-		if (v->h > t->h) split(t, v->l, v->r, v->val), t = v;
-		else if (t->val <= v->val) insert(t->r, v);
-		else insert(t->l, v);
-		op(t);
-	}
-
-	void erase(Node *&t, T v)
+	void erase(Node *&t, int pos)
 	{
 		if (!t) return;
-		if (t->val == v) {
+		
+		int p = 1;
+		if (t->l) p += t->l->sz;
+
+		if (p == pos) {
 			Node *aux = t;
 			merge(t, t->l, t->r);
 			delete aux;
 		}
-		else if (t->val < v) erase(t->r, v);
-		else erase(t->l, v);
+		else if (p < pos) erase(t->r, pos-p);
+		else erase(t->l, pos);
 		op(t);
 	}
 
@@ -84,18 +83,6 @@ private:
 		else return kth(t->l, pos);
 	}
 
-	int ord(Node *t, T val)
-	{
-		Node *aux = nullptr, *r = nullptr;
-		split(root, aux, r, val);
-		
-		int ans = 0;
-		if (aux) ans = aux->sz;
-		
-		merge(root, aux, r);
-		return ans;
-	}
-
 	void del(Node *t)
 	{
 		if (t->l) del(t->l);
@@ -106,48 +93,33 @@ private:
 	Node *root;
 
 public:
-	void insert(T val)
+	void insert(int pos, T val)
 	{
-		Node *aux = new Node(val);
-		insert(root, aux);
+		Node *l = nullptr, *r = nullptr, *aux = new Node(val);
+
+		split(root, l, r, pos+1);
+		merge(l, l, aux);
+		merge(root, l, r);
 	}
 
-	template <typename... Args>
-	void insert(T val, Args... args)
+	void erase(int pos)
 	{
-		insert(val);
-		insert(args...);
+		erase(root, pos+1);
 	}
 
-	void erase(T val)
-	{
-		erase(root, val);
-	}
-
-	template <typename... Args>
-	void erase(T val, Args... args)
-	{
-		erase(val);
-		erase(args...);
-	}
-
-	void erase_range(T ini, T fim)
+	void erase_range(int ini, int fim)
 	{
 		Node *l = nullptr, *r = nullptr, *aux=nullptr;
-		split(root, l, aux, ini);
-		split(aux, aux, r, fim);
-		del(aux);
+
+		split(root, l, aux, ini+1);
+		split(aux, aux, r, fim-ini+1);
+		if (aux) del(aux);
 		merge(root, l, r);
 	}
 
 	T kth(int pos)
 	{
 		return kth(root, pos+1);
-	}
-
-	int ord(T val)
-	{
-		return ord(root, val);
 	}
 
 	friend ostream& operator<<(ostream& out, Treap const& tp)
@@ -172,18 +144,16 @@ int main()
 {
 	Treap<int> tp;
 
-	tp.insert(3, 1, 5);
+	tp.insert(0, 5);
+	tp.insert(1, 3);
+	tp.insert(0, 2);
 	cout << tp << "\n";
 
-	tp.erase(3);
+	tp.erase(0);
 	cout << tp << "\n";
 	
-	tp.insert(2, 3, 4);
-	cout << tp << "\n";
-	
-	cout << tp.kth(4) << "\n";
-	cout << tp.ord(5) << "\n";
+	cout << tp.kth(1) << "\n";
 
-	tp.erase_range(2, 5);
+	tp.erase_range(1, 2);
 	cout << tp << "\n";
 }
