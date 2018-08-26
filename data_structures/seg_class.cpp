@@ -3,10 +3,11 @@
 template <typename T>
 class Seg {
 private:
-	
+	using op_t = std::function<T(T const&, T const&)>;
+
 	int n;
+	op_t op;
 	std::vector<T> tree;
-	std::function<T(T const&, T const&)> op;
 
 	T const& build(int no, int l, int r, std::vector<T> const& v)
 	{
@@ -54,17 +55,17 @@ private:
 
 public:
 	
-	Seg(T (*op_)(T const&, T const&)) :
+	Seg(op_t op_) :
 		op(op_)
 	{}
 
-	Seg(int n_, T (*op_)(T const&, T const&)) :
+	Seg(int n_, op_t op_) :
 		op(op_), n(n_)
 	{
 		tree.resize(n*4);
 	}
 
-	Seg(std::vector<T> const& v, T (*op_)(T const&, T const&)) :
+	Seg(std::vector<T> const& v, op_t op_) :
 		op(op_), n(v.size())
 	{
 		tree.resize(n*4);
