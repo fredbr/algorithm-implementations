@@ -6,7 +6,7 @@ private:
 	using op_t = std::function<T(T const&, T const&)>;
 
 	int n;
-	op_t op;
+	op_t const op;
 	std::vector<T> tree;
 
 	T const& build(int no, int l, int r, std::vector<T> const& v)
@@ -54,11 +54,6 @@ private:
 	}
 
 public:
-	
-	Seg(op_t op_) :
-		op(op_)
-	{}
-
 	Seg(int n_, op_t op_) :
 		op(op_), n(n_)
 	{
@@ -81,15 +76,6 @@ public:
 	{
 		return get(0, 0, n-1, l, r);
 	}
-
-	void build(std::vector<T> const& v)
-	{	
-		n = v.size();
-		tree.resize(n*4);
-		build(0, 0, n-1, v);
-	}
-
-
 };
 
 Seg<int> sg(101010,
@@ -111,4 +97,7 @@ int main()
 
 	std::cout << seg->get(0, n-1) << "\n";
 	std::cout << seg->get(0, 4) << "\n";
+
+	auto seg2 = Seg<int>(v, [] (int const& a, int const& b) -> int
+		                            { return std::max(a, b); });
 }
