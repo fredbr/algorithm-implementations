@@ -63,6 +63,12 @@ public:
 		tree.resize(n*4);
 	}
 
+	Seg(int n_,	join_t op_,	fix_t fix_) :
+		join(op_), n(n_), fix(fix_)
+	{
+		tree.resize(n*4);
+	}
+
 	Seg(std::vector<T> const& v, join_t op_) :
 		join(op_), n(v.size())
 	{
@@ -70,9 +76,7 @@ public:
 		build(0, 0, n-1, v);
 	}
 
-	Seg(std::vector<T> const& v,
-		join_t op_,
-		fix_t fix_) :
+	Seg(std::vector<T> const& v, join_t op_, fix_t fix_) :
 		join(op_), n(v.size()), fix(fix_)
 	{
 		tree.resize(n*4);
