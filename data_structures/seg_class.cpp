@@ -3,10 +3,13 @@
 template <typename T>
 class Seg {
 private:
-	using op_t = std::function<T(T const&, T const&)>;
+	using join_t = std::function<T(T const&, T const&)>;
+	using fix_t = std::function<void(T &, T const&)>;
 
 	int n;
-	op_t const op;
+	join_t const join;
+	fix_t const fix = [] (T& a, T const& b) { a = b;};
+
 	std::vector<T> tree;
 
 	T const& build(int no, int l, int r, std::vector<T> const& v)
@@ -19,8 +22,8 @@ private:
 		build(no*2+1, l, m, v);
 		build(no*2+2, m+1, r, v);
 
-		tree[no] = op(build(no*2+1, l, m, v),
-		              build(no*2+2, m+1, r, v));
+		tree[no] = join(build(no*2+1, l, m, v),
+		                build(no*2+2, m+1, r, v));
 
 		return tree[no];
 	}
@@ -28,7 +31,7 @@ private:
 	void upd(int no, int l, int r, int pos, T val)
 	{
 		if (l == r) {
-			tree[no] = val;
+			fix(tree[no], val);
 			return;
 		}
 
@@ -37,7 +40,7 @@ private:
 		if (pos <= m) upd(no*2+1, l, m, pos, val);
 		else upd(no*2+2, m+1, r, pos, val);
 
-		tree[no] = op(tree[no*2+1], tree[no*2+2]);
+		tree[no] = join(tree[no*2+1], tree[no*2+2]);
 	}
 
 	T get(int no, int l, int r, int a, int b)
@@ -49,19 +52,28 @@ private:
 		if (b <= m) return get(no*2+1, l, m, a, b);
 		if (a > m) return get(no*2+2, m+1, r, a, b);
 
-		return op(get(no*2+1, l, m, a, b),
-		          get(no*2+2, m+1, r, a, b));
+		return join(get(no*2+1, l, m, a, b),
+		            get(no*2+2, m+1, r, a, b));
 	}
 
 public:
-	Seg(int n_, op_t op_) :
-		op(op_), n(n_)
+	Seg(int n_, join_t op_) :
+		join(op_), n(n_)
 	{
 		tree.resize(n*4);
 	}
 
-	Seg(std::vector<T> const& v, op_t op_) :
-		op(op_), n(v.size())
+	Seg(std::vector<T> const& v, join_t op_) :
+		join(op_), n(v.size())
+	{
+		tree.resize(n*4);
+		build(0, 0, n-1, v);
+	}
+
+	Seg(std::vector<T> const& v,
+		join_t op_,
+		fix_t fix_) :
+		join(op_), n(v.size()), fix(fix_)
 	{
 		tree.resize(n*4);
 		build(0, 0, n-1, v);
@@ -78,26 +90,59 @@ public:
 	}
 };
 
-Seg<int> sg(101010,
-			[] (int const& a, int const& b) -> int
-                { return std::max(a, b); });
+// example (Baldes - OBI2018)
+namespace Problem
+{
+	struct Node
+	{
+		int mini, maxi, ans;
+	};
+
+	Node join(Node const& a, Node const& b)
+	{
+		Node ans;
+		ans.mini = std::min(a.mini, b.mini);
+		ans.maxi = std::max(a.maxi, b.maxi);
+		ans.ans = std::max({a.ans, b.ans,
+		                    abs(a.maxi-b.mini),
+		                    abs(b.maxi-a.mini)});
+		return ans;
+	}
+
+	void fix(Node& a, Node const& b)
+	{
+		a.mini = std::min(a.mini, b.mini);
+		a.maxi = std::max(a.maxi, b.maxi);
+	}
+}
 
 int main()
 {
-	int n;
-	std::cin >> n;
+	int n, q;
+	std::cin >> n >> q;
 
-	std::vector<int> v(n);
+	std::vector<Problem::Node> v(n);
 	for (int i = 0; i < n; i++)
-		std::cin >> v[i];
+		std::cin >> v[i].mini, v[i].maxi = v[i].mini;
 
-	auto seg = std::make_unique<Seg<int>>
-	                            (v, [] (int const& a, int const& b) -> int
-		                            { return std::max(a, b); });
+	auto sg = Seg<Problem::Node>(v, Problem::join, Problem::fix);
 
-	std::cout << seg->get(0, n-1) << "\n";
-	std::cout << seg->get(0, 4) << "\n";
+	while (q--) {
 
-	auto seg2 = Seg<int>(v, [] (int const& a, int const& b) -> int
-		                            { return std::max(a, b); });
+		int op;
+		std::cin >> op;
+
+		if (op == 1) {
+			int val, pos;
+			std::cin >> val >> pos;
+
+			sg.upd(pos-1, {val, val, 0});
+		}
+		else {
+			int l, r;
+			std::cin >> l >> r;
+
+			std::cout << sg.get(l-1, r-1).ans << "\n"; 
+		}
+	}
 }
