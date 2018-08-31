@@ -14,9 +14,9 @@ int solve(int i, int j)
 	if (i > n or j > m) return 0;
 	if (dp[i][j] >= 0) return dp[i][j];
 
-	if (a[i] == b[j]) return 1 + solve(i+1, j+1);
+	if (a[i] == b[j]) return dp[i][j] = 1 + solve(i+1, j+1);
 
-	return max(solve(i+1, j), solve(i, j+1));
+	return dp[i][j] = max(solve(i+1, j), solve(i, j+1));
 }
 
 int d[2][maxn];
