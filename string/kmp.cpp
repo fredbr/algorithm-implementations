@@ -2,8 +2,6 @@
 
 using namespace std;
 
-const int MAXN = 1e6+10;
-
 string s, p;
 
 vector<int> pre(string const& s)
