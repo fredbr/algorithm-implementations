@@ -3,18 +3,19 @@
 using namespace std;
 
 
-// compresses positions [0,n) to values [1, n]
-template <typename T>
-void compress(T&& v, int n)
+// compresses positions [0,n) to values [pos, n+pos]
+template <typename Iter>
+void compress(Iter ini, Iter fim, int pos=1)
 {
-	vector<typename decay<decltype(v[0])>::type> vv(n);
-	for (int i = 0; i < n; i++)
-		vv[i] = v[i];
+	using T = typename decay<decltype(*ini)>::type;
 
+	vector<T> vv(fim-ini);
+	copy(ini, fim, vv.begin());
 	sort(vv.begin(), vv.end());
-
-	for (int i = 0; i < n; i++)
-		v[i] = lower_bound(vv.begin(), vv.end(), v[i]) - vv.begin() + 1;
+	vv.erase(unique(vv.begin(), vv.end()), vv.end());
+	for_each(ini, fim, [&] (T& x) {
+		x = lower_bound(vv.begin(), vv.end(), x)-vv.begin() + pos;
+	});
 }
 
 int va[] = {0, 1000, 2000, 5000, 3000}; 
@@ -22,8 +23,8 @@ vector<int> v{1000, 2000, 5000, 3000};
 
 int main()
 {
-	compress(va+1, 4);
-	compress(v, 4);
+	compress(va+1, va+5, 1);
+	compress(v.begin(), v.end(), 0);
 
 	for (int i = 1; i <= 4; i++)
 		cout << va[i] << " ";
