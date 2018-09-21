@@ -2,19 +2,18 @@
 
 using namespace std;
 
-
-// compresses positions [0,n) to values [pos, n+pos]
+// compresses values in positions [ini, fim) to [pos, n+pos]
 template <typename Iter>
 void compress(Iter ini, Iter fim, int pos=1)
 {
 	using T = typename decay<decltype(*ini)>::type;
 
-	vector<T> vv(fim-ini);
-	copy(ini, fim, vv.begin());
+	vector<T> vv(ini, fim);
 	sort(vv.begin(), vv.end());
 	vv.erase(unique(vv.begin(), vv.end()), vv.end());
+
 	for_each(ini, fim, [&] (T& x) {
-		x = lower_bound(vv.begin(), vv.end(), x)-vv.begin() + pos;
+		x = lower_bound(vv.begin(), vv.end(), x) - vv.begin() + pos;
 	});
 }
 
@@ -23,7 +22,7 @@ vector<int> v{1000, 2000, 5000, 3000};
 
 int main()
 {
-	compress(va+1, va+5, 1);
+	compress(va+1, va+5);
 	compress(v.begin(), v.end(), 0);
 
 	for (int i = 1; i <= 4; i++)
