@@ -1,5 +1,4 @@
 #include <bits/stdc++.h>
-#include "/home/fred/test_cases/jng.h"
 
 using namespace std;
 
@@ -56,16 +55,6 @@ inline bool is_prime(ll n)
 
 	return true;
 }
-
-struct seeder
-{
-	template <typename T>
-	void generate(T begin, T end)
-	{
-		for (random_device r; begin != end; ++begin)
-			*begin = r();
-	}
-};
 
 int main()
 {
