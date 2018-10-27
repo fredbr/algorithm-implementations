@@ -22,8 +22,8 @@ int ilog10(ull x)
 	if (x >= 1000000000000000ull) ans += 16, x /= 10000000000000000ull;
 	if (x >= 10000000ull) ans += 8, x /= 100000000ull;
 	if (x >= 1000ull) ans += 4, x /= 10000ull;
-	if (x >= 10) ans += 2, x /= 100ull;
-	if (x >= 1) ans++;
+	if (x >= 10ull) ans += 2, x /= 100ull;
+	if (x >= 1ull) ans++;
 	return ans;
 }
 
