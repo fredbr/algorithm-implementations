@@ -4,5 +4,5 @@
 !*.*
 # Unignore all dirs
 !*/
-
+!LICENSE
 *.txt
