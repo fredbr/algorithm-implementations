@@ -5,17 +5,23 @@ using namespace std;
 typedef long long ll;
 
 template <int n, int m>
-struct Matrix
-{
+struct Matrix {
 	ll v[n][m];
+
+	static Matrix<n, m> ones() {
+		Matrix<n, m> ans{};
+		for (int i = 0; i < n; i++)
+			ans.v[i][i] = 1;
+		return ans;
+	}
 };
 
-ll mod = 1e9+7;
+ll const mod = 1e9+7;
 
 template <int n, int m, int p>
 Matrix<n, p> operator*(Matrix<n, m> const& a, Matrix<m, p> const& b)
 {
-	auto ans = Matrix<n, p>();
+	auto ans = Matrix<n, p>{};
 	for (int i = 0; i < n; i++)
 		for (int j = 0; j < p; j++)
 			for (int k = 0; k < m; k++)
@@ -26,8 +32,7 @@ Matrix<n, p> operator*(Matrix<n, m> const& a, Matrix<m, p> const& b)
 template <int n>
 Matrix<n, n> power(Matrix<n, n> a, ll b)
 {
-	Matrix ans = a;
-	b--;
+	auto ans = Matrix<n, n>::ones();
 	while (b) {
 		if (b&1) ans = ans*a;
 		a = a*a;
@@ -55,10 +60,10 @@ int main()
 	ll n;
 	cin >> n;
 
-	if (n < 3) {
-		cout << base.v[0][n] << "\n";
-		return 0;
-	}
+	// if (n < 3) {
+		// cout << base.v[0][n] << "\n";
+		// return 0;
+	// }
 	
 	Matrix<3,3> exp = {0, 1, 0, 
 	                   0, 0, 1,
