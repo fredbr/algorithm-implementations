@@ -60,11 +60,6 @@ int main()
 	ll n;
 	cin >> n;
 
-	// if (n < 3) {
-		// cout << base.v[0][n] << "\n";
-		// return 0;
-	// }
-	
 	Matrix<3,3> exp = {0, 1, 0, 
 	                   0, 0, 1,
 	                   2, 4, 1};
