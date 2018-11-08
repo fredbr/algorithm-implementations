@@ -15,13 +15,15 @@ vector<ll> all_sums(vector<ll> const& v)
             ans[j+ini] = ans[j];
         for (int j = ini; j < ini*2; j++)
             ans[j] += i;
+        // merging inplace removes the need to sort after the computation
+        inplace_merge(ans.begin(), ans.begin()+ini, ans.begin()+ini*2);
         ini *= 2;
     }
 
     return ans;
 }
 
-// solution in O(n*2^(n/2)) using meet-in-the-middle algorithm
+// solution in O(2^(n/2)) using meet-in-the-middle algorithm
 int main()
 {
     int n;
@@ -37,15 +39,19 @@ int main()
 
     auto s1 = all_sums(v1), s2 = all_sums(v2);
 
-    sort(s1.begin(), s1.end());
-    sort(s2.begin(), s2.end());
+    reverse(s1.begin(), s1.end());
 
     ll ans = 0;
+    auto l = s2.begin(), r = s2.begin();
     for (ll i : s1) {
         // amount of numbers in range [a, b]
-        ans += upper_bound(s2.begin(), s2.end(), b-i) -
-               lower_bound(s2.begin(), s2.end(), a-i);
+        // using two-pointers technique
+        while (r != s2.end() and *r+i <= b) ++r;
+        while (l != s2.end() and *l+i < a) ++l;
+        ans += r-l;
+               
     }
 
+    // overall complexity O(2^(n/2)) ~ O(1.41^n)
     cout << ans << "\n";
 }
