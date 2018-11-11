@@ -104,7 +104,7 @@ private:
 		op(t);
 	}
 
-	char kth(Node *t, int k)
+	T kth(Node *t, int k)
 	{	
 		if (!t) return -1;
 
@@ -119,8 +119,9 @@ public:
 
 	~Treap() = default;
 
-	Treap(const Treap& t) = delete;
-	Treap(Treap&& t) = delete;
+	Treap(Treap const& tp) : root(new Node(tp.root)) {};
+	
+	Treap(Treap&& tp) : root(tp.root) {};
 
 	Treap& operator=(Treap const& tp) {
 		root = new Node(tp.root);
@@ -129,7 +130,6 @@ public:
 
 	Treap& operator=(Treap&& tp) {
 		root = tp.root;
-		root->old = true;
 		return *this;
 	}
 
