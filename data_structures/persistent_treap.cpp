@@ -5,61 +5,52 @@ using namespace std;
 const int maxn = 101010;
 
 template <typename T>
-struct treap
-{
-	struct node
+struct Treap {
+private:
+	struct Node
 	{
-		node *l, *r;
+		Node *l, *r;
 		int h, sz;
 		T val;
 		bool old;
 
-		node(T val)
-			: val(val), h(rand()), sz(1), l(nullptr), r(nullptr), old(0) {};
+		Node(T val)
+			: l(nullptr), r(nullptr), h(rand()), sz(1), val(val), old(false) {};
 
-		node(node* t)
+		Node(Node* t)
 		{
 			*this = *t;
-			old = 1;
+			old = true;
 		}
 	};
 
-	node *root;
+	Node *root;
 
-	treap()
-		: root(nullptr) {} ;
-
-	treap(const treap& t)
-	{
-		if (t.root) root = new node(t.root);
-		else root = nullptr;
-	}
-
-	int sz(node *t)
+	int sz(Node *t)
 	{
 		return t? t->sz : 0;
 	}	
 
-	void op(node *t)
+	void op(Node *t)
 	{
 		if (!t) return;
 
 		t->sz = sz(t->l) + sz(t->r) + 1;
 	}
 
-	void clone(node *t)
+	void clone(Node *t)
 	{
 		if (!t) return;
 
-		if (t->old == 0) return;
+		if (t->old == false) return;
 
-		if (t->l) t->l = new node(t->l);
-		if (t->r) t->r = new node(t->r);
+		if (t->l) t->l = new Node(t->l);
+		if (t->r) t->r = new Node(t->r);
 
-		t->old = 0;
+		t->old = true;
 	}
 
-	void merge(node *&t, node *l, node *r)
+	void merge(Node *&t, Node *l, Node *r)
 	{
 		clone(l), clone(r);
 
@@ -71,7 +62,7 @@ struct treap
 		op(t);
 	}
 
-	void split(node *t, node *&l, node *&r, T val)
+	void split(Node *t, Node *&l, Node *&r, T val)
 	{
 		clone(t);
 
@@ -83,7 +74,7 @@ struct treap
 		op(l), op(r);
 	}
 
-	void insert(node *&t, node *v)
+	void insert(Node *&t, Node *v)
 	{
 		clone(t);
 
@@ -96,14 +87,14 @@ struct treap
 		op(t);
 	}
 
-	void erase(node *&t, T v)
+	void erase(Node *&t, T v)
 	{
 		clone(t);
 
 		if (!t) return;
 		if (t->val == v) {
 
-			node *tmp = t;
+			Node *tmp = t;
 			merge(t, t->l, t->r);
 			delete tmp;
 		}
@@ -113,20 +104,38 @@ struct treap
 		op(t);
 	}
 
-	char kth(node *t, int k)
+	char kth(Node *t, int k)
 	{	
 		if (!t) return -1;
 
 		int pos = sz(t->l) + 1;
 
-		if (k == pos) return t->val.ss;
+		if (k == pos) return t->val;
 		else if (pos > k) return kth(t->l, k);
 		else return kth(t->r, k-pos);
 	}
+public:
+	Treap() : root(nullptr) {} ;
 
-	void insert(char v)
+	~Treap() = default;
+
+	Treap(const Treap& t) = delete;
+	Treap(Treap&& t) = delete;
+
+	Treap& operator=(Treap const& tp) {
+		root = new Node(tp.root);
+		return *this;
+	}
+
+	Treap& operator=(Treap&& tp) {
+		root = tp.root;
+		root->old = true;
+		return *this;
+	}
+
+	void insert(T const& v)
 	{	
-		node *t = new node(ii(sz(root), v));
+		Node *t = new Node(v);
 		insert(root, t);
 	}
 
@@ -135,15 +144,25 @@ struct treap
 		erase(root, v);
 	}
 
-	char kth(int k)
+	T kth(int k)
 	{
-		return kth(root, k);
+		return kth(root, k+1);
 	}
 };
 
-treap<int> v[maxn];
+Treap<int> v[maxn];
 
 int main()
 {
+	v[0].insert(4);
+	
+	v[1] = v[0];
+	v[1].insert(6);
 
+	v[2] = v[1];
+	v[2].erase(4);
+
+	cout << v[0].kth(0) << "\n";
+	cout << v[1].kth(0) << " " << v[1].kth(1) << "\n";
+	cout << v[2].kth(0) << "\n";
 }
