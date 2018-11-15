@@ -5,7 +5,7 @@ using namespace std;
 const int maxn = 101010;
 
 template <typename T>
-struct Treap {
+class Treap {
 private:
 	struct Node
 	{
@@ -14,7 +14,7 @@ private:
 		T val;
 		bool old;
 
-		Node(T val)
+		Node(T const& val)
 			: l(nullptr), r(nullptr), h(rand()), sz(1), val(val), old(false) {};
 
 		Node(Node* t)
@@ -93,7 +93,6 @@ private:
 
 		if (!t) return;
 		if (t->val == v) {
-
 			Node *tmp = t;
 			merge(t, t->l, t->r);
 			delete tmp;
@@ -104,20 +103,20 @@ private:
 		op(t);
 	}
 
-	T kth(Node *t, int k)
+	T const& kth(Node *t, int k)
 	{	
-		if (!t) return -1;
-
 		int pos = sz(t->l) + 1;
 
 		if (k == pos) return t->val;
 		else if (pos > k) return kth(t->l, k);
 		else return kth(t->r, k-pos);
 	}
+
 public:
 	Treap() : root(nullptr) {} ;
 
 	~Treap() = default;
+	// n sei o que fazer :/
 
 	Treap(Treap const& tp) : root(new Node(tp.root)) {};
 	
@@ -139,12 +138,12 @@ public:
 		insert(root, t);
 	}
 
-	void erase(T v)
+	void erase(T const& v)
 	{
 		erase(root, v);
 	}
 
-	T kth(int k)
+	T const& kth(int k)
 	{
 		return kth(root, k+1);
 	}
