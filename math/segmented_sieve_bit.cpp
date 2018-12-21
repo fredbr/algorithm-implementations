@@ -4,9 +4,20 @@
 
 using namespace std;
 
-uint32_t const sieve_size = 1<<17;
+uint32_t const sieve_size = 1<<20;
 
 vector<uint64_t> solve(uint64_t l, uint64_t r) {
+	static const int64_t unset_bit[16] = {
+	  ~(1 << 0), ~(1 << 0),
+	  ~(1 << 1), ~(1 << 1),
+	  ~(1 << 2), ~(1 << 2),
+	  ~(1 << 3), ~(1 << 3),
+	  ~(1 << 4), ~(1 << 4),
+	  ~(1 << 5), ~(1 << 5),
+	  ~(1 << 6), ~(1 << 6),
+	  ~(1 << 7), ~(1 << 7)
+	};
+
 	uint64_t i = 3, s = 3, n = std::max(l|1, 3ul);
 	uint64_t sqt = std::sqrt(r);
 
@@ -33,7 +44,7 @@ vector<uint64_t> solve(uint64_t l, uint64_t r) {
 	}
 
 	for (uint64_t low = l; low < r; low += sieve_size) {
-		fill(sieve.begin(), sieve.end(), true);
+		fill(sieve.begin(), sieve.end(), 0xff);
 		uint64_t high = min(r, low+sieve_size);
 
 		for (; i*i < high; i += 2)
@@ -51,12 +62,12 @@ vector<uint64_t> solve(uint64_t l, uint64_t r) {
 		for (size_t j = 0; j < primes.size(); j++) {
 			uint64_t k = mult[j];
 			for (uint64_t prime = primes[j]*2; k < sieve_size; k += prime)
-				sieve[k/2] = false;
+				sieve[k>>4] &= unset_bit[k&15];
 			mult[j] = k-sieve_size;
 		}
 
 		for (; n < high; n += 2)
-			if (sieve[(n-low)/2])
+			if (sieve[(n-low)>>4]&~unset_bit[(n-low)&15])
 				result.push_back(n);
 	}
 

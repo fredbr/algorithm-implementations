@@ -6,7 +6,6 @@ using ll = long long;
 
 int const maxn = 101010;
 ll const maxm = 1e9;
-ll const inf = 0x3f3f3f3f3f3f3f3f;
 
 struct Fc {
     ll a, b;
@@ -48,7 +47,7 @@ ll get(Node *t, ll l, ll r, ll x) {
         return min(t->fn.eval(x), get(t->l, l, m, x));
     else if (x > m and t->r)
         return min(t->fn.eval(x), get(t->r, m+1, r, x));
-    
+
     return t->fn.eval(x);
 }
 
@@ -62,7 +61,7 @@ int main()
     cin >> n;
 
     for (int i = 1; i <= n; i++) cin >> a[i];
-    for (int i = 1; i <= n; i++) cin >> b[i], dp[i] = inf;
+    for (int i = 1; i <= n; i++) cin >> b[i];
 
     Node *root = new Node{{b[1], 0}};
     dp[1] = b[1];
