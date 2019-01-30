@@ -18,6 +18,9 @@ inline u128 mul(u128 x, u128 y, u128 c)
     return ans % c;
 }
 
+u128 HI(u128 x) { return x>>64; };    
+u128 LO(u128 x) { return u64(x); };
+    
 namespace Prime {
 
     int const num_tries = 20;
@@ -55,7 +58,7 @@ namespace Prime {
         u128 s = 1, d = x>>1;
         while (!(d&1)) s++, d>>= 1;
 
-        uniform_int_distribution<u64> rng(2, u64(x)-1);
+        uniform_int_distribution<u64> rng(2, HI(x)? u64(-1ull): (u64(x)-1));
 
         for (int i = 0; i < num_tries; i++) {
             u64 p = rng(rd);
@@ -82,10 +85,7 @@ namespace Factor {
             x*=x; 
         } 
     }
-
-    u128 HI(u128 x) { return x>>64; };
-    u128 LO(u128 x) { return u64(x); };
-    
+  
     struct u256 {
         u128 hi, lo;
         
@@ -110,7 +110,7 @@ namespace Factor {
 
     inline u128 gcd(u128 a, u128 b) {
         auto ctz = [] (u128 x) {
-            if (u64(x)) return __builtin_ctzll(x);
+            if (!HI(x)) return __builtin_ctzll(x);
             return 64 + __builtin_ctzll(x>>64);
         };
 
@@ -169,7 +169,7 @@ namespace Factor {
         if (x%2 == 0) return 2;
         if (x%3 == 0) return 3;
 
-        uniform_int_distribution<u64> rng(2, u64(x)-1);
+        uniform_int_distribution<u64> rng(2, HI(x)? u64(-1ull): (u64(x)-1));
 
         for (u128 i = 2; i < num_tries; i++) {
             u128 ans = rho(rng(rd), x, i);
