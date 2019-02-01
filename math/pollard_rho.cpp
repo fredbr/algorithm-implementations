@@ -6,7 +6,17 @@ typedef unsigned long long ll;
 
 inline ll mul(ll a, ll b, ll c)
 {
+#ifdef __SIZEOF_INT128__
 	return (__uint128_t)a*b%c;
+#else
+	ll ans = 0;
+	while (b) {
+		if (b&1) ans = (a+ans)%c;
+		a = (a+a)%c;
+		b >>= 1;
+	}
+	return ans;
+#endif
 }
 
 namespace Prime {
@@ -26,7 +36,6 @@ namespace Prime {
 		ll x = power(base, d, n);
 		ll y;
 		while (s--) {
-
 			y = mul(x, x, n);
 			if (y == 1 and x != 1 and x != n-1) return false;
 			x = y;
@@ -86,8 +95,6 @@ namespace Factor {
 		if (x%2 == 0) return 2;
 		if (x%3 == 0) return 3;
 
-		if (Prime::is_prime(x)) return 0;
-
 		uniform_int_distribution<ll> rng(2, x-1);
 
 		for (ll i = 2; i < num_tries; i++) {
@@ -97,27 +104,13 @@ namespace Factor {
 		return 0;
 	}
 
-	vector<ll> factor(ll x) {
-		vector<ll> fac;
-		queue<ll> prox;
-
-		prox.push(x);
-
-		while (!prox.empty()) {
-
-			ll a = prox.front();
-			prox.pop();
-			if (Prime::is_prime(a)) fac.push_back(a);
-			else {
-				
-				ll b = rho(a);
-
-				if (b != 0) prox.push(b), prox.push(a/b);
-				else fac.push_back(a);
-			}
+	void factor(vector<ll>& v, ll x) {
+		if (Prime::is_prime(x)) v.push_back(x);
+		else {
+			ll y = rho(x);
+			factor(v, y);
+			factor(v, x/y);
 		}
-		sort(fac.begin(), fac.end());
-		return fac;
 	}
 } // end namespace Factor
 
@@ -128,8 +121,9 @@ int main()
 
 	vector<ll> fac;
 	for (int i = 0; i < 100; i++)
-		fac = Factor::factor(x);
+		Factor::factor(fac, x), fac.clear();
 
-	for (ll i : fac) cout << i << "\n";
+	Factor::factor(fac, x);
+	for (ll i : fac) cout << i << " ";
 	cout << "\n";
 }
