@@ -25,7 +25,7 @@ class Seg
         else {
             int my = (ly+ry)/2;
             build_y(nox, noy*2+1, lx, rx, ly, my);
-            build_y(nox, noy*2+1, lx, rx, my+1, ry);
+            build_y(nox, noy*2+2, lx, rx, my+1, ry);
             tree[nox][noy] = op(tree[nox][noy*2+1], tree[nox][noy*2+2]);
         }
     }
