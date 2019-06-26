@@ -120,8 +120,6 @@ int main()
 	cin >> x;
 
 	vector<ll> fac;
-	for (int i = 0; i < 100; i++)
-		Factor::factor(fac, x), fac.clear();
 
 	Factor::factor(fac, x);
 	for (ll i : fac) cout << i << " ";

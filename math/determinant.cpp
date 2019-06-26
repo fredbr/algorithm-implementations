@@ -47,6 +47,10 @@ T determinant(std::vector<std::vector<T>> A) {
             std::swap(A[best], A[i]);
         }
 
+        if (A[i][i] == T()) {
+            return T();
+        }
+
         ans *= T(A[i][i]);
         divide_row<T>(A[i], A[i][i]);
 
