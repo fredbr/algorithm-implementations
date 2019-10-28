@@ -12,7 +12,8 @@ private:
 
 	std::vector<T> tree;
 
-	T const& build(int no, int l, int r, std::vector<T> const& v)
+	template<typename Iter>
+	T const& build(int no, int l, int r, Iter const& v)
 	{
 		if (l == r)
 			return tree[no] = v[l];
@@ -58,29 +59,35 @@ private:
 
 public:
 	Seg(int n_, join_t op_) :
-		join(op_), n(n_)
-	{
-		tree.resize(n*4);
-	}
+		join(op_), n(n_), tree(n*4) {};
 
 	Seg(int n_,	join_t op_,	fix_t fix_) :
-		join(op_), n(n_), fix(fix_)
-	{
-		tree.resize(n*4);
-	}
+		join(op_), n(n_), fix(fix_), tree(n*4) {};
 
 	Seg(std::vector<T> const& v, join_t op_) :
-		join(op_), n(v.size())
+		join(op_), n(v.size()), tree(v.size()*4)
 	{
-		tree.resize(n*4);
-		build(0, 0, n-1, v);
+		build(0, 0, n-1, v.data());
 	}
 
 	Seg(std::vector<T> const& v, join_t op_, fix_t fix_) :
-		join(op_), n(v.size()), fix(fix_)
+		join(op_), n(v.size()), fix(fix_), tree(v.size()*4)
 	{
-		tree.resize(n*4);
-		build(0, 0, n-1, v);
+		build(0, 0, n-1, v.data());
+	}
+
+	template<typename Iter>
+	Seg(Iter const& begin, Iter const& end, join_t op_) :
+		join(op_), n(end-begin), tree(4*(end-begin))
+	{
+		build(0, 0, n-1, begin);
+	}
+
+	template<typename Iter>
+	Seg(Iter const& begin, Iter const& end, join_t op_, fix_t fix_) :
+		join(op_), n(end-begin), fix(fix_), tree(4*(end-begin))
+	{
+		build(0, 0, n-1, begin);
 	}
 
 	void upd(int pos, T val)
@@ -129,7 +136,7 @@ int main()
 	for (int i = 0; i < n; i++)
 		std::cin >> v[i].mini, v[i].maxi = v[i].mini;
 
-	auto sg = Seg<Problem::Node>(v, Problem::join, Problem::fix);
+	auto sg = Seg<Problem::Node>(v.begin(), v.end(), Problem::join, Problem::fix);
 
 	while (q--) {
 

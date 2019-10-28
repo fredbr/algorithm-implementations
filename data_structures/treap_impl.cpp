@@ -2,17 +2,22 @@
 
 using namespace std;
 
+mt19937 rd{17};
+
 template <typename T>
 class Treap {
 private:
-	struct Node
-	{
-		T val;
-		int h, sz;
+	struct Node	{
 		Node *l, *r;
+		T val;
+		uint32_t h, sz;
 
-		Node(T x)
-			: val(x), h(rand()), sz(1), l(nullptr), r(nullptr) {};
+		Node() = default;
+
+		~Node() {};
+
+		Node(T const& x)
+			: l(nullptr), r(nullptr), val(x), h(rd()), sz(1) {};
 
 		friend ostream& operator<<(ostream& out, Node const& t)
 		{
@@ -23,16 +28,15 @@ private:
 		}
 	};
 
-	void op(Node *t)
-	{
+
+	void op(Node *t) {
 		if (!t) return;
 		t->sz = 1;
 		if (t->l) t->sz += t->l->sz;
 		if (t->r) t->sz += t->r->sz;	
 	}
 
-	void merge(Node *&t, Node *l, Node *r)
-	{
+	void merge(Node *&t, Node *l, Node *r) {
 		if (!l or !r)
 			return void(t=l?l:r);
 		if (l->h > r->h)
@@ -42,8 +46,7 @@ private:
 		op(t);
 	}
 
-	void split(Node *t, Node *&l, Node *&r, int pos)
-	{
+	void split(Node *t, Node *&l, Node *&r, int pos) {
 		if (!t) return void(l=r=nullptr);
 
 		int p = 1;
@@ -56,50 +59,128 @@ private:
 		op(l), op(r);
 	}
 
-	void erase(Node *&t, int pos)
-	{
+	void insert(Node *&t, Node *aux, int pos) {
+		if (!t) {
+			t = aux;
+			op(t);
+			return;
+		}
+
+		int p = 1;
+		if (t->l) p += t->l->sz;
+
+		if (t->h < aux->h) split(t, aux->l, aux->r, pos), t = aux;
+		else if (p >= pos) insert(t->l, aux, pos);
+		else insert(t->r, aux, pos-p);
+
+		op(t);
+	}
+
+	void erase(Node *&t, int pos) {
 		if (!t) return;
 		
 		int p = 1;
 		if (t->l) p += t->l->sz;
 
-		if (p == pos) {
-			Node *aux = t;
-			merge(t, t->l, t->r);
-			delete aux;
-		}
+		if (p == pos) merge(t, t->l, t->r);
 		else if (p < pos) erase(t->r, pos-p);
 		else erase(t->l, pos);
+
 		op(t);
 	}
 
-	T kth(Node *t, int pos)
+	Node& kth(Node *t, int pos)
 	{
 		int p = 1;
 		if (t->l) p += t->l->sz;
 
-		if (p == pos) return t->val;
+		if (p == pos) return *t;
 		if (pos > p) return kth(t->r, pos-p);
 		else return kth(t->l, pos);
 	}
 
-	void del(Node *t)
-	{
-		if (t->l) del(t->l);
-		if (t->r) del(t->r);
-		delete t;
+	Node *root = nullptr;
+	vector<Node> aux_new;
+	int idx = 0;
+
+	Node* _get_ptr(T const& val) {
+		return ::new (static_cast<void*>(&aux_new[idx++])) Node(val);
 	}
 
-	Node *root;
-
 public:
-	void insert(int pos, T val)
-	{
-		Node *l = nullptr, *r = nullptr, *aux = new Node(val);
+	class Iterator {
+	public:
+		stack<Node*> bt;
+		Iterator()  = default;
+		Iterator(Iterator&& t) : bt(move(t.bt)) {};
+		Iterator(Iterator const& t) : bt(t.bt) {};
 
-		split(root, l, r, pos+1);
-		merge(l, l, aux);
-		merge(root, l, r);
+		Iterator& operator=(Iterator&& t) {
+			return Iterator(move(t));
+		}
+
+		Iterator& operator=(Iterator const& t) {
+			return Iterator(t);
+		}
+
+		Iterator& operator++() {
+			Node* t = bt.top();
+
+			if (!t->r) {
+				bt.pop();
+				return *this;
+			}
+
+			t = t->r;
+			bt.pop();
+			bt.push(t);
+
+			while (t->l) {
+				t = t->l;
+				bt.push(t);
+			}
+
+			return *this;
+		}
+
+		Node& operator*() {
+			return *bt.top();
+		}
+
+		Node* operator->() {
+			return bt.top();
+		}
+
+		bool operator==(Iterator const& t) const {
+			return bt == t.bt;
+		}
+
+		bool operator!=(Iterator const& t) const {
+			return !(bt == t.bt);
+		}
+	};
+
+	Iterator begin() {
+		Iterator it;
+		Node* t = root;
+
+		while (t and t->l) {
+			it.bt.push(t);
+			t = t->l;
+		}
+		if (t) it.bt.push(t);
+
+		return it;
+	}
+
+	Iterator end() {
+		return Iterator();
+	}
+
+	void insert(int pos, T const& val)
+	{
+		Node *l = nullptr, *r = nullptr, *aux = _get_ptr(val);
+		insert(root, aux, pos+1);
 	}
 
 	void erase(int pos)
@@ -107,17 +188,7 @@ public:
 		erase(root, pos+1);
 	}
 
-	void erase_range(int ini, int fim)
-	{
-		Node *l = nullptr, *r = nullptr, *aux=nullptr;
-
-		split(root, l, aux, ini+1);
-		split(aux, aux, r, fim-ini+1);
-		if (aux) del(aux);
-		merge(root, l, r);
-	}
-
-	T kth(int pos)
+	Node& kth(int pos)
 	{
 		return kth(root, pos+1);
 	}
@@ -131,29 +202,105 @@ public:
 
 	Treap()
 	{
+		aux_new.resize(1'000'000);
 		root = nullptr;
 	}
-
-	~Treap()
-	{
-		if (root) del(root);
-	}
 };
+
+class Timer {
+public:
+    Timer(const std::string& name) : name_(name) {
+        start_ = std::chrono::steady_clock::now();
+    }
+
+    Timer() : Timer("") {}
+
+    Timer(const Timer&) = delete;
+    Timer& operator=(const Timer&) = delete;
+    Timer(Timer&&) = delete;
+    Timer& operator=(Timer&&) = delete;
+
+    ~Timer() {
+        auto dif = std::chrono::steady_clock::now() - start_;
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(dif);
+        if (!name_.empty()) {
+            std::cerr << "[" << name_ << "] ";
+        }
+        std::cerr << ms.count() << " ms\n";
+    }
+
+private:
+    std::string name_;
+    std::chrono::steady_clock::time_point start_;
+};
+
+struct Query {
+	enum class Op{
+		INSERT,
+		ERASE,
+		QUERY,
+	} opt;
+	// Op opt;
+	int pos, val;
+};
+
+vector<Query> gen_bench(int n, int p_insert, int p_erase, int p_query) {
+	vector<Query> v(n);
+
+	mt19937 rg{13};
+
+	uniform_int_distribution<int> roll(0, 99);
+
+	int num = 0;
+
+	auto f = [&num, p_insert, p_erase, p_query] (int p) {
+		if (num == 0 or p < p_insert) {
+			num++;
+			return Query::Op::INSERT;
+		}
+		else if (p < p_insert+p_erase) {
+			num--;
+			return Query::Op::ERASE;
+		}
+		else return Query::Op::QUERY;
+	};
+
+	for (auto& qr : v) {
+		int p = roll(rg);
+
+		int pos = uniform_int_distribution<int>(0, num)(rg);
+		int val = rg();
+		qr = {f(p), pos, val};
+	}
+
+	return v;
+}
+
+int64_t run_bench(vector<Query> const& qrs, Treap<int>& tp) {
+	Timer timer{"total"};
+	int64_t total = 0;
+	for (auto const& qr : qrs) {
+		if (qr.opt == Query::Op::INSERT) tp.insert(qr.pos, qr.val);
+		else if (qr.opt == Query::Op::ERASE) tp.erase(qr.pos);
+		else total += tp.kth(qr.pos).val;
+	}
+	return total;
+}
 
 int main()
 {
 	Treap<int> tp;
 
-	tp.insert(0, 5);
-	tp.insert(1, 3);
-	tp.insert(0, 2);
-	cout << tp << "\n";
+	tp.insert(0,3);
+	tp.insert(1,1);
+	tp.insert(2,2);
+	tp.insert(3,5);
+	tp.insert(4,7);
+	tp.insert(5,6);
 
-	tp.erase(0);
-	cout << tp << "\n";
-	
-	cout << tp.kth(1) << "\n";
+	for (auto it : tp) cout << it.val << "\n";
 
-	tp.erase_range(1, 2);
-	cout << tp << "\n";
+	auto ans = run_bench(gen_bench(1'000'000, 60, 20, 20), tp);
+
+	cout << ans << "\n";
 }
