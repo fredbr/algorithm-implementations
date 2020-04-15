@@ -23,6 +23,12 @@
 // - SPOJ MUL, VFMUL: Multiplication.
 // - SPOJ FDIV, VFDIV: Division.
 
+#include <bits/stdc++.h>
+
+using namespace std;
+
+using ll = long long;
+
 const int BASE_DIGITS = 9;
 const int BASE = 1000000000;
 
@@ -594,3 +600,27 @@ struct BigInt {
         return res / norm;
     }
 };
+
+bool is_sqrt(BigInt n) {
+    static constexpr int primes[] = {3,5,7,11,13,17,19,23,29,31,37,41,43,47,53,59,61,67,71,73,79,83,89,97,101,103,107,109,113,127,131,137,139,149};
+        
+    auto fexp = [] (ll a, ll b, ll c) {
+        ll ans= 1;
+        while (b) {
+            if (b&1) ans = a*ans%c;
+            a = a*a%c;
+            b /= 2;
+        }
+        return ans;
+    };
+
+    for (int p : primes) {
+        ll x = n % p;
+
+        if (x == 0) continue;
+
+        if (fexp(x, (p-1)/2, p) != 1) return false;
+    }
+
+    return true;
+}
