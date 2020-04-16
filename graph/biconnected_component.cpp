@@ -17,7 +17,7 @@ struct BiconnectedComponent {
             dfs(i, 1);
     }
 
-    void dfs(int x, int isRoot) {
+    void dfs(int x, int isRoot, int p) {
         low[x] = num[x] = ++counter;
         if (v[x].empty()) {
             components.push_back(vector<int>(1, x));
@@ -28,7 +28,7 @@ struct BiconnectedComponent {
         for (int u : v[x]) {
             if (num[u] > -1) low[x] = min(low[x], num[u]);
             else {
-                dfs(u, 0);
+                dfs(u, 0, x);
                 low[x] = min(low[x], low[u]);
 
                 if (isRoot || low[u] >= num[x]) {
