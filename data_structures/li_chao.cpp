@@ -61,7 +61,7 @@ private:
 public:
     LiChao() : root(nullptr) {}
 
-    void upd(ll a, ll b, ll l = -inf, ll r = inf) {
+    void upd(ll a, ll b, ll l = 0, ll r = 1e6) {
         if (!root) {
             root = make_unique<Node>(Fc{a, b});
             return;
@@ -69,11 +69,10 @@ public:
         upd(root, l, r, {a, b});
     }
 
-    ll get(ll x, ll l = -inf, ll r = inf) {
+    ll get(ll x, ll l = 0, ll r = 1e6) {
         return get(root, x, l, r);
     }
 };
-
 ll a[maxn], b[maxn], dp[maxn];
 
 int main()
@@ -86,7 +85,7 @@ int main()
     for (int i = 1; i <= n; i++) cin >> a[i];
     for (int i = 1; i <= n; i++) cin >> b[i];
 
-    LiChao<less<ll>> l;
+    LiChao<> l;
 
     l.upd(b[1], 0);
 
