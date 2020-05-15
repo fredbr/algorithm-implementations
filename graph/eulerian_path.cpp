@@ -5,19 +5,15 @@ using namespace std;
 
 int const maxn = 101010;
 
-struct Edge {
-    int u;
-    bool vis;
-};
-
-vector<Edge> v[maxn];
+vector<int> v[maxn];
+int at[maxn];
 
 void dfs(int x, vector<int>& r) {
-    for (auto& e : v[x]) {
-        if (e.vis) continue;
+    while (at[x] < (int)v[x].size()) {
+        int u = v[x][at[x]];
+        at[x]++;
 
-        e.vis = true;
-        dfs(e.u, r);
+        dfs(u, r);
     }
     r.push_back(x);
 }
