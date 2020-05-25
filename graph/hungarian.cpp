@@ -4,6 +4,10 @@ using namespace std;
 
 constexpr int inf = numeric_limits<int>::max();
 
+// finds an answer for the assignment problem using
+// the hungarian algorithm in O(n^2*m) [O(n^3)]
+// everything is 1 indexed
+// ans[0] is the cost of the minimum assignment
 struct Hungarian {
     Hungarian(vector<vector<int>> const& a) :
             n((int)a.size() - 1), m((int)a[0].size() - 1),
