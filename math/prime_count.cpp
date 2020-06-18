@@ -4,6 +4,26 @@ using namespace std;
 
 using ll = long long;
 
+ll isqrt(ll x) {
+    ll l = 0, r = 1e9;
+    while (r-l > 1) {
+        ll m = (l+r)/2;
+        if (m*m <= x) l = m;
+        else r = m;
+    }
+    return l;
+}
+
+ll icbrt(ll x) {
+    ll l = 0, r = 1e6;
+    while (r-l > 1) {
+        ll m = (l+r)/2;
+        if (m*m*m <= x) l = m;
+        else r = m;
+    }
+    return l;
+}
+
 vector<int> sieve(int n) {
     vector<bool> b(n+1);
     for (int i = 3; i*i <= n; i += 2) {
@@ -22,7 +42,8 @@ vector<int> sieve(int n) {
 }
 
 // at least sqrt(n) for pi(n)
-int const sqrt_limit = 1e7 + 1;
+// bigger values may be faster
+int const sqrt_limit = isqrt(1e12) + 1;
 
 auto primes = sieve(sqrt_limit);
 
@@ -52,15 +73,15 @@ ll pi(ll x) {
         return upper_bound(primes.begin(), primes.end(), x) - primes.begin();
     }
 
-    ll a = pi(pow(x, 1.0/4));
-    ll b = pi(pow(x, 1.0/2));
-    ll c = pi(pow(x, 1.0/3));
+    ll a = pi(isqrt(isqrt(x)));
+    ll b = pi(isqrt(x));
+    ll c = pi(icbrt(x));
 
     ll res = phi(x, a) + (b+a-2)*(b-a+1)/2;
 
     for (ll i = a+1; i <= b; i++) {
         ll w = x / primes[i-1];
-        ll b_i = pi(pow(w, 1.0/2));
+        ll b_i = pi(sqrt(w));
         res -= pi(w);
 
         if (i <= c) {
@@ -73,7 +94,6 @@ ll pi(ll x) {
     pi_cache[x] = res;
     return res;
 }
-
 int main() {
     ll n;
     cin >> n;
