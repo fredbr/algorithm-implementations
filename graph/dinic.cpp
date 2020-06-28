@@ -16,7 +16,7 @@ const int MAXN = 1e5 + 5;
 
 template<typename T>
 struct Dinic {
-	constexpr T flow_inf = 1e18;
+	static constexpr T flow_inf = 1e18;
 	
 	struct FlowEdge {
 		int v, u;
