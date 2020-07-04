@@ -1,84 +1,62 @@
 #include <bits/stdc++.h>
 
-#define REP(i, n) for(int i = 0; i < int(n); ++i)
-#define REP2(i, ini, fim) for (int i = int(ini); i <= int(fim); ++i)
-
 using namespace std;
 
-const int maxn = 101010;
+vector<int> sort_cyclic_shifts(string const& s) {
+    int const n = s.size();
+    int const alphabet = 256;
+	vector<int> p(n), c(n), cnt(max(alphabet, n), 0);
+    
+	for (int i = 0; i < n; i++)
+        cnt[s[i]]++;
+    for (int i = 1; i < alphabet; i++)
+        cnt[i] += cnt[i-1];
+	for (int i = 0; i < n; i++)
+        p[--cnt[s[i]]] = i;
+    
+	c[p[0]] = 0;
+    int classes = 1;
 
-namespace sarray
-{
-	string s;
-	int n, gap;
-	int sa[maxn], pos[maxn], tmp[maxn], lcp[maxn];
-
-	bool suf_comp(int i, int j)
-	{
-		if (pos[i] != pos[j]) return pos[i] < pos[j];
-
-		i += gap, j += gap;
-
-		return (i < n and j < n)? pos[i] < pos[j] : i > j;
-	}
-
-	void build()
-	{
-		n = s.size();
-
-		REP(i, n) sa[i] = i, pos[i] = s[i];
-
-		for (gap=1;; gap <<= 1) {
-
-			sort(sa, sa+n, suf_comp);
-
-			REP(i, n-1) tmp[i+1] = tmp[i] + suf_comp(sa[i], sa[i+1]);
-			REP(i, n) pos[sa[i]] = tmp[i];
-
-			if (tmp[n-1] == n-1) break;
-		}
-	}
-
-	void buildLCP()
-	{
-		for (int i = 0, k = 0; i < n; ++i) if (pos[i] != n - 1)
-		{
-			for (int j = sa[pos[i] + 1]; s[i + k] == s[j + k]; ++k);
-			lcp[pos[i]] = k;
-			if (k)--k;
-		}
-	}
-
-	int ds()
-	{
-		int result = n - sa[0];
- 
-	    for (int i = 1; i < n; i++)
-	        result += (n - sa[i]) - lcp[i - 1];
- 
-	    result++;
-	    return result;
-	}
-} // namespace sarray
-
-int main()
-{
-	ios_base::sync_with_stdio(false);
-	cin.tie(0);
-
-	// int t;
-	// cin >> t;
+    for (int i = 1; i < n; i++) {
+        if (s[p[i]] != s[p[i-1]])
+            classes++;
+        c[p[i]] = classes - 1;
+    }
 	
-	// while (t--) {
-	
-		cin >> sarray::s;
+	vector<int> pn(n), cn(n);
 
-		sarray::build();
-		sarray::buildLCP();
-		REP(i, sarray::n) cout << sarray::lcp[i] << " ";
-		cout << "\n";
-		// sarray::buildLCP();
+    for (int h = 0; (1 << h) < n; ++h) {
+        for (int i = 0; i < n; i++) {
+            pn[i] = p[i] - (1 << h);
+            if (pn[i] < 0)
+                pn[i] += n;
+        }
 
-		// cout << sarray::ds() << "\n";
-	// }
+        fill(cnt.begin(), cnt.begin() + classes, 0);
+        for (int i = 0; i < n; i++)
+            cnt[c[pn[i]]]++;
+        for (int i = 1; i < classes; i++)
+            cnt[i] += cnt[i-1];
+        for (int i = n-1; i >= 0; i--)
+            p[--cnt[c[pn[i]]]] = pn[i];
+        cn[p[0]] = 0;
+        classes = 1;
+
+        for (int i = 1; i < n; i++) {
+            pair<int, int> cur = {c[p[i]], c[(p[i] + (1 << h)) % n]};
+            pair<int, int> prev = {c[p[i-1]], c[(p[i-1] + (1 << h)) % n]};
+            if (cur != prev)
+                ++classes;
+            cn[p[i]] = classes - 1;
+        }
+        c.swap(cn);
+    }
+    return p;
+}
+
+vector<int> suffix_array(string s) {
+    s += "$";
+    vector<int> sorted_shifts = sort_cyclic_shifts(s);
+    sorted_shifts.erase(sorted_shifts.begin());
+    return sorted_shifts;
 }
