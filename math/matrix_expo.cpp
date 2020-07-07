@@ -4,67 +4,51 @@ using namespace std;
 
 typedef long long ll;
 
-template <int n, int m>
+template<int N, int M>
 struct Matrix {
-	ll v[n][m];
+    int v[N][M];
 
-	static Matrix<n, m> ones() {
-		Matrix<n, m> ans{};
-		for (int i = 0; i < n; i++)
-			ans.v[i][i] = 1;
-		return ans;
-	}
+    static Matrix ones() {
+        Matrix ans{};
+        for (int i = 0; i < N; i++) ans.v[i][i] = 1;
+        return ans;
+    }
 };
 
-ll const mod = 1e9+7;
+template<int N, int M, int P>
+Matrix<N, P> operator*(Matrix<N, M> const& a, Matrix<M, P> const& b) {
+    Matrix<N, P> ans{};
 
-template <int n, int m, int p>
-Matrix<n, p> operator*(Matrix<n, m> const& a, Matrix<m, p> const& b)
-{
-	auto ans = Matrix<n, p>{};
-	for (int i = 0; i < n; i++)
-		for (int j = 0; j < p; j++)
-			for (int k = 0; k < m; k++)
-				ans.v[i][j] = (ans.v[i][j] + a.v[i][k]*b.v[k][j])%mod;
-	return ans;
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < P; j++) {
+            for (int k = 0; k  < M; k++) {
+                add(ans.v[i][j], (ll)a.v[i][k] * b.v[k][j] % mod);
+            }
+        }
+    }
+
+    return ans;
 }
 
-template <int n>
-Matrix<n, n> power(Matrix<n, n> a, ll b)
-{
-	auto ans = Matrix<n, n>::ones();
-	while (b) {
-		if (b&1) ans = ans*a;
-		a = a*a;
-		b /= 2;
-	}
-	return ans;
+template<int N>
+Matrix<N, N> fexp(Matrix<N, N> a, ll b) {
+    auto ans = Matrix<N, N>::ones();
+    while (b) {
+        if (b&1) ans = ans*a;
+        a = a*a;
+        b /= 2;
+    }
+    return ans;
 }
 
-template <int n, int m>
-ostream& operator<< (ostream& out, Matrix<n, m> const& mat)
-{
-	for (int i = 0; i < n; i++) {
-		for (int j = 0; j < m; j++)
-			out << mat.v[i][j] << " ";
-		out << "\n";
-	}
-	return out;
-}
-
-// Muro (OBI - 2018)
-int main()
-{
-	Matrix<3, 1> base = {1, 1, 5};
-
-	ll n;
-	cin >> n;
-
-	Matrix<3,3> exp = {0, 1, 0, 
-	                   0, 0, 1,
-	                   2, 4, 1};
-
-	auto ans = power(exp, n)*base;
-
-	cout << ans.v[0][0] << "\n";
+template<int N>
+Matrix<N, N> coeff(vector<int> const& c) {
+    Matrix<N, N> ans{};
+    for (int i = 0; i < N-1; i++) {
+        ans.v[i+1][i] = 1;
+    }
+    for (int i = 0; i < N; i++) {
+        ans.v[0][i] = c[i];
+    }
+    return ans;
 }
