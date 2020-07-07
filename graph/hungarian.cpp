@@ -53,6 +53,7 @@ struct Hungarian {
         for (int j=1; j <= m; j++) {
             ans[p[j]] = j;
         }
+        ans[0] = -v[0];
         return ans;
     }
 
