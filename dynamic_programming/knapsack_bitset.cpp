@@ -9,7 +9,7 @@ int const maxm = 100000001;
 int v[maxn];
 // must to have two bitsets as one serves as temporary to avoid
 // stack oveflow which happens when large bitsets are implicitly 
-// allocated eg. dp |= dp<<v[i] (dp<<v[i] is allocated on the heap)
+// allocated eg. dp |= dp<<v[i] (dp<<v[i] is allocated on the stack)
 bitset<maxm> dp, dp2;
 
 // find first value > m that cannot be formed by the sums of
